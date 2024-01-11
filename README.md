@@ -1,4 +1,4 @@
-## API Request Security PoC ()
+## API Request Security PoC
 This Proof of Concept (PoC) code demonstrates a simple implementation of API request security using RSA signatures and nonces. The code is written in Python and utilizes the Flask framework. This code is mentioned in article mentioned [here](https://mwalkowski.github.io/post/using-burp-python-scripts-to-sign-requests-with-rsa-keys/).
 
 ###  Prerequisites
