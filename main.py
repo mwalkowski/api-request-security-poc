@@ -1,3 +1,9 @@
+# API Request Security PoC
+# Michal Walkowski - https://mwalkowski.github.io/
+# https://github.com/mwalkowski
+#
+# For RSA Signing Process: https://httpwg.org/http-extensions/draft-ietf-httpbis-message-signatures.html#name-rsassa-pkcs1-v1_5-using-sha
+
 import re
 import base64
 import datetime
@@ -46,7 +52,8 @@ def check_headers_exists():
 def is_nonce_created_at_correct():
     try:
         nonce_created_at = request.headers[NONCE_CREATED_AT_HEADER]
-        time_diff = datetime.now().astimezone(timezone.utc) - datetime.fromisoformat(nonce_created_at)
+        time_diff = datetime.now().astimezone(timezone.utc) - \
+                    datetime.fromisoformat(nonce_created_at)
         return time_diff.total_seconds() < TIME_DIFF_TOLERANCE_IN_SECONDS
     except Exception:
         return False
@@ -78,7 +85,8 @@ def verify(message, signature):
 def is_signature_correct():
     nonce_value = request.headers[NONCE_HEADER]
     nonce_created_at = request.headers[NONCE_CREATED_AT_HEADER]
-    signature_input = "{}{}{}{}{}".format(request.method, request.path, nonce_value, nonce_created_at, request.data.decode())
+    signature_input = "{}{}{}{}{}".format(request.method, request.path, nonce_value,
+                                          nonce_created_at, request.data.decode())
     signature_input_b64 = base64.standard_b64encode(signature_input.encode())
     return verify(signature_input_b64, request.headers[SIGNATURE_HEADER])
 

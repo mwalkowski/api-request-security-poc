@@ -1,3 +1,9 @@
+# API Request Security PoC
+# Michal Walkowski - https://mwalkowski.github.io/
+# https://github.com/mwalkowski
+#
+# For RSA Signing Process: https://httpwg.org/http-extensions/draft-ietf-httpbis-message-signatures.html#name-rsassa-pkcs1-v1_5-using-sha
+
 import base64
 import datetime
 import json
