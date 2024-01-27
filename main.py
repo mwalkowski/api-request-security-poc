@@ -73,10 +73,10 @@ def is_nonce_correct():
     return False
 
 
-def verify(message, signature):
-    h = SHA256.new(message)
+def verify(signature_input_b64, received_signature):
+    hash = SHA256.new(signature_input_b64)
     try:
-        pkcs_signature.new(PUBLIC_KEY).verify(h, base64.standard_b64decode(signature))
+        pkcs_signature.new(PUBLIC_KEY).verify(hash, base64.standard_b64decode(received_signature))
     except (ValueError, TypeError) as e:
         return False
     return True
