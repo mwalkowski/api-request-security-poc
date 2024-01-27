@@ -26,9 +26,12 @@ PRIVATE_KEY_PATH = 'private.key'
 PUBLIC_KEY_PATH = 'public.pem'
 SIGNATURE_HEADER = 'X-Signature'
 NONCE_HEADER = 'X-Nonce-Value'
-NONCE_QUEUE_SIZE_LIMIT = 10
 NONCE_CREATED_AT_HEADER = 'X-Nonce-Created-At'
+REQUIRED_HEADERS = [NONCE_HEADER, NONCE_CREATED_AT_HEADER, NONCE_CREATED_AT_HEADER]
+
+NONCE_QUEUE_SIZE_LIMIT = 10
 TIME_DIFF_TOLERANCE_IN_SECONDS = 10.0
+
 
 
 PUBLIC_KEY = RSA.import_key(open(PUBLIC_KEY_PATH).read())
@@ -40,12 +43,9 @@ app = Flask(__name__)
 
 
 def check_headers_exists():
-    if NONCE_HEADER not in request.headers:
-        return NONCE_HEADER
-    if NONCE_CREATED_AT_HEADER not in request.headers:
-        return NONCE_CREATED_AT_HEADER
-    if SIGNATURE_HEADER not in request.headers:
-        return SIGNATURE_HEADER
+    for header in REQUIRED_HEADERS:
+        if header not in request.headers:
+            return header
     return None
 
 
