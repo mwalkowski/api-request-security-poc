@@ -2,8 +2,8 @@
 # Michal Walkowski - https://mwalkowski.github.io/
 # https://github.com/mwalkowski
 #
-# For RSA Signing Process: https://httpwg.org/http-extensions/draft-ietf-httpbis-message-signatures.html#name-rsassa-pkcs1-v1_5-using-sha
 
+import json
 import re
 import base64
 import datetime
@@ -19,6 +19,7 @@ from requests import status_codes
 from datetime import datetime, timezone
 
 from Crypto.Signature import pkcs1_15 as pkcs_signature
+from Crypto.Cipher import PKCS1_v1_5 as pkcs_cipher
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 
@@ -31,7 +32,6 @@ REQUIRED_HEADERS = [NONCE_HEADER, NONCE_CREATED_AT_HEADER, SIGNATURE_HEADER]
 
 NONCE_QUEUE_SIZE_LIMIT = 10
 TIME_DIFF_TOLERANCE_IN_SECONDS = 10.0
-
 
 
 PUBLIC_KEY = RSA.import_key(open(PUBLIC_KEY_PATH).read())
@@ -116,10 +116,40 @@ def signature_required(f):
     return decorator
 
 
+def decrypt_body(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        msg = request.get_json()
+        if 'encryptedPayload' in msg:
+            try:
+                encrypted_payload = base64.standard_b64decode(msg['encryptedPayload'])
+                msg = pkcs_cipher.new(PRIVATE_KEY).decrypt(encrypted_payload, "sentinel")
+                request.data = json.loads(base64.standard_b64decode(msg))
+            except (ValueError, TypeError):
+                return make_response('Decryption problem')
+        else:
+            return make_response('Missing encryptedPayload param')
+        return f(*args, **kwargs)
+    return decorator
+
+
 @app.route("/signed-body", methods=["POST"])
 @signature_required
 def signed_body():
     return jsonify({"msg": "Ok!"})
+
+
+@app.route("/encrypted-body", methods=["POST"])
+@decrypt_body
+def encrypted_body():
+    return jsonify({"msg": "Hello {}".format(request.data['name'])})
+
+
+@app.route("/signed-encrypted-body", methods=["POST"])
+@signature_required
+@decrypt_body
+def signed_encrypted_body():
+    return jsonify({"msg": "Hello {}".format(request.data['name'])})
 
 
 if __name__ == "__main__":
