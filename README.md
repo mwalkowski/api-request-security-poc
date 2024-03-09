@@ -57,6 +57,16 @@ python3 main.py
    **Body:** JSON payload with 'encryptedPayload' containing the encrypted message  
    **Description:** This endpoint verifies the integrity of the request using RSA signatures and decrypts the encrypted payload.
 
+4. **/encrypted-req-resp-signed - Signed and Encrypted Request, Encrypted Response**  
+   **Method:** POST  
+   **Headers:**
+      * X-Signature: RSA signature of the request    
+      * X-Nonce-Value: Nonce value  
+      * X-Nonce-Created-At: Nonce creation timestamp  
+
+   **Body:** JSON payload with 'encryptedPayload' containing the encrypted message  
+   **Description:** This endpoint verifies the integrity of the request using RSA signatures and decrypts the encrypted payload.
+
 ### Usage
 Send API requests to the specified endpoints using appropriate headers and payload.
 Use the provided Flask routes for testing different security mechanisms.
