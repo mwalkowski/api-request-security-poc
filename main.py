@@ -133,6 +133,18 @@ def decrypt_body(f):
     return decorator
 
 
+def encrypt_response(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        response = f(*args, **kwargs)
+        ciphertext = pkcs_cipher.new(PUBLIC_KEY).encrypt(
+            base64.standard_b64encode(response.data))
+        response.data = json.dumps({'encryptedPayload':  base64.standard_b64encode(
+            ciphertext).decode()})
+        return response
+    return decorator
+
+
 @app.route("/signed-body", methods=["POST"])
 @signature_required
 def signed_body():
@@ -149,6 +161,14 @@ def encrypted_body():
 @signature_required
 @decrypt_body
 def signed_encrypted_body():
+    return jsonify({"msg": "Hello {}".format(request.data['name'])})
+
+
+@app.route('/encrypted-req-resp-signed', methods=['POST'])
+@signature_required
+@decrypt_body
+@encrypt_response
+def encrypted_endpoint():
     return jsonify({"msg": "Hello {}".format(request.data['name'])})
 
 
